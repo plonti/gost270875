@@ -1,25 +1,25 @@
-/** @OnlyCurrentDoc */
+п»ї/** @OnlyCurrentDoc */
 
 var ss = SpreadsheetApp.getActiveSpreadsheet();
 var sheet = ss.getActiveSheet();
 
-var lengthRow = 7; // номер строки с длиной брёвен
-var valueRowStart = 9; // номер первой строки содержащей значения диаметра/количества
-var valueRowEnd = 56; // номер последней строки содержащей значения диаметра/количества
-var expectedFormat = "#,##0.00"; // ожидаемый формат числовой ячейки
+var lengthRow = 7; // РЅРѕРјРµСЂ СЃС‚СЂРѕРєРё СЃ РґР»РёРЅРѕР№ Р±СЂС‘РІРµРЅ
+var valueRowStart = 9; // РЅРѕРјРµСЂ РїРµСЂРІРѕР№ СЃС‚СЂРѕРєРё СЃРѕРґРµСЂР¶Р°С‰РµР№ Р·РЅР°С‡РµРЅРёСЏ РґРёР°РјРµС‚СЂР°/РєРѕР»РёС‡РµСЃС‚РІР°
+var valueRowEnd = 56; // РЅРѕРјРµСЂ РїРѕСЃР»РµРґРЅРµР№ СЃС‚СЂРѕРєРё СЃРѕРґРµСЂР¶Р°С‰РµР№ Р·РЅР°С‡РµРЅРёСЏ РґРёР°РјРµС‚СЂР°/РєРѕР»РёС‡РµСЃС‚РІР°
+var expectedFormat = "#,##0.00"; // РѕР¶РёРґР°РµРјС‹Р№ С„РѕСЂРјР°С‚ С‡РёСЃР»РѕРІРѕР№ СЏС‡РµР№РєРё
 
 /**
-* Вычисляет кубатуру для заданного столбца columnName. Для правильной работы необходимо выполнение следующих условий:
-* 1) Столбец А должен содержать в строках с 9 по 56 диаметры
-* 2) Столбец columnName в строке 7 должен содержать длину брёвен
-* 3) Столбец columnName в строках c 9 по 56 должен содержать количество брёвен указанного в столбце А диаметра
+* Р’С‹С‡РёСЃР»СЏРµС‚ РєСѓР±Р°С‚СѓСЂСѓ РґР»СЏ Р·Р°РґР°РЅРЅРѕРіРѕ СЃС‚РѕР»Р±С†Р° columnName. Р”Р»СЏ РїСЂР°РІРёР»СЊРЅРѕР№ СЂР°Р±РѕС‚С‹ РЅРµРѕР±С…РѕРґРёРјРѕ РІС‹РїРѕР»РЅРµРЅРёРµ СЃР»РµРґСѓСЋС‰РёС… СѓСЃР»РѕРІРёР№:
+* 1) РЎС‚РѕР»Р±РµС† Рђ РґРѕР»Р¶РµРЅ СЃРѕРґРµСЂР¶Р°С‚СЊ РІ СЃС‚СЂРѕРєР°С… СЃ 9 РїРѕ 56 РґРёР°РјРµС‚СЂС‹
+* 2) РЎС‚РѕР»Р±РµС† columnName РІ СЃС‚СЂРѕРєРµ 7 РґРѕР»Р¶РµРЅ СЃРѕРґРµСЂР¶Р°С‚СЊ РґР»РёРЅСѓ Р±СЂС‘РІРµРЅ
+* 3) РЎС‚РѕР»Р±РµС† columnName РІ СЃС‚СЂРѕРєР°С… c 9 РїРѕ 56 РґРѕР»Р¶РµРЅ СЃРѕРґРµСЂР¶Р°С‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ Р±СЂС‘РІРµРЅ СѓРєР°Р·Р°РЅРЅРѕРіРѕ РІ СЃС‚РѕР»Р±С†Рµ Рђ РґРёР°РјРµС‚СЂР°
 *
-* @param {string} - Столбец с количеством брёвен по диаметрам
-* @param {boolean} - Выводить отладочную информацию в ячейку вместо суммарной кубатуры
-* @return - Возвращает либо строку суммарной кубатуры, либо отладочную строку
+* @param {string} - РЎС‚РѕР»Р±РµС† СЃ РєРѕР»РёС‡РµСЃС‚РІРѕРј Р±СЂС‘РІРµРЅ РїРѕ РґРёР°РјРµС‚СЂР°Рј
+* @param {boolean} - Р’С‹РІРѕРґРёС‚СЊ РѕС‚Р»Р°РґРѕС‡РЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ РІ СЏС‡РµР№РєСѓ РІРјРµСЃС‚Рѕ СЃСѓРјРјР°СЂРЅРѕР№ РєСѓР±Р°С‚СѓСЂС‹
+* @return - Р’РѕР·РІСЂР°С‰Р°РµС‚ Р»РёР±Рѕ СЃС‚СЂРѕРєСѓ СЃСѓРјРјР°СЂРЅРѕР№ РєСѓР±Р°С‚СѓСЂС‹, Р»РёР±Рѕ РѕС‚Р»Р°РґРѕС‡РЅСѓСЋ СЃС‚СЂРѕРєСѓ
 * @customfunction
 */
-function КУБАТУРА(columnName, debug) {
+function РљРЈР‘РђРўРЈР Рђ(columnName, debug) {
   checkColumn_("A", false);
   checkColumn_(columnName, true);
   
@@ -36,9 +36,9 @@ function КУБАТУРА(columnName, debug) {
   return volume;
 }
 
-// Проверка столбца columnName
-// 1. Если в строках [valueRowStart, valueRowEnd] не числа - генерирует ошибку
-// 2. Для emptyAllowed == true допускает наличие пустых ячеек в строках столбца
+// РџСЂРѕРІРµСЂРєР° СЃС‚РѕР»Р±С†Р° columnName
+// 1. Р•СЃР»Рё РІ СЃС‚СЂРѕРєР°С… [valueRowStart, valueRowEnd] РЅРµ С‡РёСЃР»Р° - РіРµРЅРµСЂРёСЂСѓРµС‚ РѕС€РёР±РєСѓ
+// 2. Р”Р»СЏ emptyAllowed == true РґРѕРїСѓСЃРєР°РµС‚ РЅР°Р»РёС‡РёРµ РїСѓСЃС‚С‹С… СЏС‡РµРµРє РІ СЃС‚СЂРѕРєР°С… СЃС‚РѕР»Р±С†Р°
 function checkColumn_(columnName, emptyAllowed) {
   for (var i = valueRowStart; i <= valueRowEnd; i++) {
     var cellName = columnName + i;
@@ -48,44 +48,44 @@ function checkColumn_(columnName, emptyAllowed) {
       if (emptyAllowed) {
         continue;
       } else {
-        throw new Error("Ячейка " + cellName + " не может быть пустой");
+        throw new Error("РЇС‡РµР№РєР° " + cellName + " РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚РѕР№");
       }
     }
 
     if (!isNumber_(cellName)) {
-      throw new Error("Содержимое ячейки " + cellName + " не является числом");
+      throw new Error("РЎРѕРґРµСЂР¶РёРјРѕРµ СЏС‡РµР№РєРё " + cellName + " РЅРµ СЏРІР»СЏРµС‚СЃСЏ С‡РёСЃР»РѕРј");
     }
   }
 }
 
-// Проверка ячейки columnName + lengthRow
-// 1. Формат совпадает с ожидаемым цифровым
-// 2. Содержимое ячейке преобразуется в число
+// РџСЂРѕРІРµСЂРєР° СЏС‡РµР№РєРё columnName + lengthRow
+// 1. Р¤РѕСЂРјР°С‚ СЃРѕРІРїР°РґР°РµС‚ СЃ РѕР¶РёРґР°РµРјС‹Рј С†РёС„СЂРѕРІС‹Рј
+// 2. РЎРѕРґРµСЂР¶РёРјРѕРµ СЏС‡РµР№РєРµ РїСЂРµРѕР±СЂР°Р·СѓРµС‚СЃСЏ РІ С‡РёСЃР»Рѕ
 function getLengthAsString_(columnName) {
   var cellName = columnName + "" + lengthRow;
   
   var cell = sheet.getRange(cellName);
   var cellType = cell.getNumberFormat();
   if (cellType != expectedFormat) {
-    throw new Error("Содержимое ячейки " + cellName + " с длиной брёвен не является числом");
+    throw new Error("РЎРѕРґРµСЂР¶РёРјРѕРµ СЏС‡РµР№РєРё " + cellName + " СЃ РґР»РёРЅРѕР№ Р±СЂС‘РІРµРЅ РЅРµ СЏРІР»СЏРµС‚СЃСЏ С‡РёСЃР»РѕРј");
   }
 
   if (!isNumber_(cellName)) {
-    throw new Error("Содержимое ячейки " + cellName + " с длиной брёвен не является числом");
+    throw new Error("РЎРѕРґРµСЂР¶РёРјРѕРµ СЏС‡РµР№РєРё " + cellName + " СЃ РґР»РёРЅРѕР№ Р±СЂС‘РІРµРЅ РЅРµ СЏРІР»СЏРµС‚СЃСЏ С‡РёСЃР»РѕРј");
   }
 
   return cell.getDisplayValue();
 }
 
-// Проверка, что в таблице кубатур есть необходимые значения:
-// 1. Вычисляем диаметр - столбец А, строки с valueRowStart по valueRowEnd
-// 2. Пытаемся извлечь из таблицы кубатур информацию по заданной длине и диаметру
+// РџСЂРѕРІРµСЂРєР°, С‡С‚Рѕ РІ С‚Р°Р±Р»РёС†Рµ РєСѓР±Р°С‚СѓСЂ РµСЃС‚СЊ РЅРµРѕР±С…РѕРґРёРјС‹Рµ Р·РЅР°С‡РµРЅРёСЏ:
+// 1. Р’С‹С‡РёСЃР»СЏРµРј РґРёР°РјРµС‚СЂ - СЃС‚РѕР»Р±РµС† Рђ, СЃС‚СЂРѕРєРё СЃ valueRowStart РїРѕ valueRowEnd
+// 2. РџС‹С‚Р°РµРјСЃСЏ РёР·РІР»РµС‡СЊ РёР· С‚Р°Р±Р»РёС†С‹ РєСѓР±Р°С‚СѓСЂ РёРЅС„РѕСЂРјР°С†РёСЋ РїРѕ Р·Р°РґР°РЅРЅРѕР№ РґР»РёРЅРµ Рё РґРёР°РјРµС‚СЂСѓ
 function checkGostTable_(length) {
   for (var i = valueRowStart; i <= valueRowEnd; i++) {
     var diameter = sheet.getRange("A" + i).getDisplayValue();
     var volume = getGostValue_(length, diameter);
     if (isNaN(parseFloat(volume)) || isFinite(volume)) {
-      throw new Error("Кубатура для длины " + length + " и диаметра " + diameter + " не определена в таблице.");
+      throw new Error("РљСѓР±Р°С‚СѓСЂР° РґР»СЏ РґР»РёРЅС‹ " + length + " Рё РґРёР°РјРµС‚СЂР° " + diameter + " РЅРµ РѕРїСЂРµРґРµР»РµРЅР° РІ С‚Р°Р±Р»РёС†Рµ.");
     }
   }
 }
@@ -96,7 +96,7 @@ function CalculateVolume_(columnName, lengthString, debug) {
   var lengthFloat = commaStringToFloat_(lengthString);
   var dbgString = "";
   if (debug) {
-    dbgString += "Длина: " + lengthString + "\n";
+    dbgString += "Р”Р»РёРЅР°: " + lengthString + "\n";
   }
   
   var summary = 0;
@@ -116,12 +116,12 @@ function CalculateVolume_(columnName, lengthString, debug) {
     summary += volumeOfMany;
     
     if (debug) {
-      dbgString += "D=" + diameterString + ", м3=" + volumeOfOneString + ". Кол-во=" + cellDisplayValue + ", м3=" + volumeOfMany + "\n";
+      dbgString += "D=" + diameterString + ", Рј3=" + volumeOfOneString + ". РљРѕР»-РІРѕ=" + cellDisplayValue + ", Рј3=" + volumeOfMany + "\n";
     }
   }
 
   if (debug) {
-    dbgString += "Кубатура м3=" + summary;
+    dbgString += "РљСѓР±Р°С‚СѓСЂР° Рј3=" + summary;
     return dbgString;
   }
 
@@ -129,7 +129,7 @@ function CalculateVolume_(columnName, lengthString, debug) {
 }
 
 /******************************
-*** Вспомогательные функции ***
+*** Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ С„СѓРЅРєС†РёРё ***
 *******************************/
 
 function isNumber_(cellName) {
@@ -150,10 +150,10 @@ function isNumber_(cellName) {
 
 function typeOfCellValue(cellName) {
   if (typeof(cellName) != "string") {
-    throw new Error("Название ячейки не является строкой: " + cellName);
+    throw new Error("РќР°Р·РІР°РЅРёРµ СЏС‡РµР№РєРё РЅРµ СЏРІР»СЏРµС‚СЃСЏ СЃС‚СЂРѕРєРѕР№: " + cellName);
   }
   if (cellName == "") {
-    throw new Error("Название ячейки не может быть пустой строкой");
+    throw new Error("РќР°Р·РІР°РЅРёРµ СЏС‡РµР№РєРё РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚РѕР№ СЃС‚СЂРѕРєРѕР№");
   }
 
   var range = sheet.getRange(cellName);

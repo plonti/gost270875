@@ -1,20 +1,20 @@
-/******************************
-********* ГОСТ 2708-75 ********
+п»ї/******************************
+********* Р“РћРЎРў 2708-75 ********
 *******************************/
 function getGostValue_(length, diameter) {
   if (typeof(length) != "string") {
-    throw new Error("Параметр length не является строковым: " + typeof(length));
+    throw new Error("РџР°СЂР°РјРµС‚СЂ length РЅРµ СЏРІР»СЏРµС‚СЃСЏ СЃС‚СЂРѕРєРѕРІС‹Рј: " + typeof(length));
   }
   if (typeof(diameter) != "string") {
-    throw new Error("Параметр diameter не является строковым: " + typeof(diameter));
+    throw new Error("РџР°СЂР°РјРµС‚СЂ diameter РЅРµ СЏРІР»СЏРµС‚СЃСЏ СЃС‚СЂРѕРєРѕРІС‹Рј: " + typeof(diameter));
   }
 
   if (!(length in gostValues)) {
-    throw new Error("Длина " + length + " отсутствует в таблице кубатур.");
+    throw new Error("Р”Р»РёРЅР° " + length + " РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РІ С‚Р°Р±Р»РёС†Рµ РєСѓР±Р°С‚СѓСЂ.");
   }
 
   if (!(diameter in gostValues[length])) {
-    throw new Error("Диаметр " + diameter + " для длины " + length + " отсутствует в таблице кубатур.");
+    throw new Error("Р”РёР°РјРµС‚СЂ " + diameter + " РґР»СЏ РґР»РёРЅС‹ " + length + " РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РІ С‚Р°Р±Р»РёС†Рµ РєСѓР±Р°С‚СѓСЂ.");
   }
 
   return gostValues[length][diameter];
